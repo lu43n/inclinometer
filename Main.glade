@@ -106,14 +106,42 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="levelValue">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">0,0%</property>
-                <attributes>
-                  <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
-                  <attribute name="foreground" value="#efef29292929"/>
-                </attributes>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="levelValueDegrees">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">0,0°</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
+                      <attribute name="foreground" value="#efef29292929"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="levelValuePercent">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">0,0%</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
+                      <attribute name="foreground" value="#efef29292929"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -137,14 +165,42 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="rotationValue">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">0,0%</property>
-                <attributes>
-                  <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
-                  <attribute name="foreground" value="#efef29292929"/>
-                </attributes>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="rotationValueDegrees">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">0,0%</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
+                      <attribute name="foreground" value="#efef29292929"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="rotationValuePercent">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">0,0%</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Tlwg Mono Bold 16"/>
+                      <attribute name="foreground" value="#efef29292929"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

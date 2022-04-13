@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "kalman.h"
+#include "six_axis_comp_filter.h"
 
 int fd;
 int temperature;
@@ -13,9 +14,9 @@ int acclX, acclY, acclZ;
 int gyroX, gyroY, gyroZ;
 float acclX_scaled, acclY_scaled, acclZ_scaled, xRotation, yRotation;
 float gyroX_scaled, gyroY_scaled, gyroZ_scaled, temperatureDegrees;
-float xRotationComplementary, yRotationComplementary;
+float *xRotationComplementary, *yRotationComplementary, xRotationKalman, yRotationKalman;
 
-GtkLabel *levelValue, *rotationValue;
+GtkLabel *levelValueDegrees, *rotationValueDegrees, *levelValuePercent, *rotationValuePercent;
 guint width, height;
 GtkStyleContext *context;
 GtkWidget *window, *rotationCircle;
@@ -26,6 +27,7 @@ cairo_t *cr;
 time_t timer;
 float dt;
 Kalman *kalmanFilter;
+SixAxis *CompFilter;
 
 gdouble rotation = 0;
 
@@ -115,13 +117,19 @@ gboolean updateRotation(GtkWidget *widget)
 
 gboolean updateReadings(GtkWidget *widget)
 {
-    gchar level[100], rotation[100];
+    gchar levelDegrees[100], rotationDegrees[100], levelPercent[100], rotationPercent[100];
 
-    sprintf(level, "%.1f°", xRotation);
-    gtk_label_set_text (GTK_LABEL(levelValue), level)
-    ;
-    sprintf(rotation, "%.1f°", yRotation);
-    gtk_label_set_text (GTK_LABEL(rotationValue), rotation);
+    sprintf(levelDegrees, "%.1f°", xRotation);
+    gtk_label_set_text (GTK_LABEL(levelValueDegrees), levelDegrees);
+
+    sprintf(levelPercent, "%.1f%%", round(tan((xRotation / 360) * 2 * M_PI) * 10000));
+    gtk_label_set_text (GTK_LABEL(levelValuePercent), levelPercent);
+
+    sprintf(rotationDegrees, "%.1f°", yRotation);
+    gtk_label_set_text (GTK_LABEL(rotationValueDegrees), rotationDegrees);
+    
+    sprintf(rotationPercent, "%.1f%%", (100 * tan(yRotation)));
+    gtk_label_set_text (GTK_LABEL(rotationValuePercent), rotationPercent);
 
    return TRUE;
 }
@@ -149,6 +157,14 @@ gboolean updateSensorData(GtkWidget *widget)
 
     printf("Temperature: %f\n", temperatureDegrees);
 
+    CompAccelUpdate(CompFilter, acclX_scaled, acclY_scaled, acclZ_scaled);
+    CompGyroUpdate(CompFilter, gyroX_scaled, gyroY_scaled, gyroZ_scaled);
+    CompUpdate(CompFilter);
+    CompStart(CompFilter);
+    CompAnglesGet(CompFilter, xRotationComplementary, yRotationComplementary);
+
+    printf("My Y rotation complementary filter: %f\n", yRotationComplementary);
+
     // printf("My Y rotation complementary filter: %f\n", yRotationComplementary);
      
     xRotation = get_x_rotation(acclX_scaled, acclY_scaled, acclZ_scaled);
@@ -158,9 +174,9 @@ gboolean updateSensorData(GtkWidget *widget)
     printf("My Y rotation: %f\n", yRotation);   
 
     dt = time(NULL) - timer;
-    xRotationComplementary = kalman_get_angle(Kalman *kalmanFilter, float xRotation, float gyroX_scaled, float dt);
+    xRotationKalman = kalman_get_angle(kalmanFilter, xRotation, gyroX_scaled, dt);
 
-    printf("My X rotation complementary filter: %f\n", xRotationComplementary);
+    printf("My X rotation kalman filter: %f\n", xRotationKalman);
 
    return TRUE;
 }
@@ -174,8 +190,10 @@ int main(int argc, char *argv[])
 
   window = GTK_WIDGET(gtk_builder_get_object (builder, "mainWindow"));
   buttonClose = GTK_BUTTON(gtk_builder_get_object (builder, "buttonClose"));
-  levelValue = GTK_LABEL(gtk_builder_get_object (builder, "levelValue"));
-  rotationValue = GTK_LABEL(gtk_builder_get_object (builder, "rotationValue"));
+  levelValueDegrees = GTK_LABEL(gtk_builder_get_object (builder, "levelValueDegrees"));
+  levelValuePercent = GTK_LABEL(gtk_builder_get_object (builder, "levelValuePercent"));
+  rotationValueDegrees = GTK_LABEL(gtk_builder_get_object (builder, "rotationValueDegrees"));
+  rotationValuePercent = GTK_LABEL(gtk_builder_get_object (builder, "rotationValuePercent"));
   rotationCircle = GTK_WIDGET(gtk_builder_get_object (builder, "draw"));
 
   gtk_builder_connect_signals (builder, NULL);
@@ -183,10 +201,12 @@ int main(int argc, char *argv[])
 
   fd = wiringPiI2CSetup (0x68);
   wiringPiI2CWriteReg8 (fd, 0x6B, 0x00);
-  printf("set 0x6B=%X\n",wiringPiI2CReadReg8 (fd,0x6B));
+  printf("set 0x6B=%X\n", wiringPiI2CReadReg8 (fd,0x6B));
 
-  void kalman_init(Kalman *kalmanFilter);
+  kalman_init(kalmanFilter);
   timer = time(NULL);
+
+  CompInit(CompFilter, 0.1, 2);
 
   g_timeout_add(100, (GSourceFunc) updateSensorData, NULL);
   g_timeout_add(100, (GSourceFunc) updateRotation, rotationCircle);

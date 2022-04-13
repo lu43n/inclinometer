@@ -66,8 +66,3 @@ void setAngle(Kalman * p_kalman , float angle)
 {
     p_kalman->angle=angle;
 }
-
-float getAngle(Kalman * p_kalman) 
-{
-    return p_kalman->angle;
-}

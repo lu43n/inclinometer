@@ -2,6 +2,7 @@
     "files.associations": {
         "six_axis_comp_filter.h": "c",
         "stdio.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "kalman.h": "c"
     }
 }
